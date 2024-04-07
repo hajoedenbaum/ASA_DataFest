@@ -30,6 +30,8 @@ checkpoints_pulse <- read.csv("Random Sample/checkpoints_pulse.csv")
 page_views_comp <- page_views[,c(1,2,3,4,5,6,7,8,9,14,15,16,17,18)]
 responses_comp <- responses[,c(1,2,3,4,5,6,8,9,10,11)]
 checkpoints_eoc_comp <- checkpoints_eoc[,c(1,2,3,4,5)]
+checkpoints_eoc_comp2 <- checkpoints_eoc[,c(1,5)]
+checkpoints_pulse_comp <- checkpoints_pulse[,c(5,8)]
 
 #merge the dataframes on the user_id column
 #data <- merge(page_views_comp, responses_comp, by = "student_id")
@@ -78,6 +80,26 @@ page_views_comp2 <- page_views[,c(5,14)]
 
 #plot chapter_number vs engaged
 plot(page_views_comp2$chapter_number, page_views_comp2$engaged)
+
+checkpoints_pulse_comp <- na.omit(checkpoints_pulse_comp)
+
+#combine the rows in checkpoints_pulse_comp by averaging the response values
+checkpoints_pulse_comp <- aggregate(checkpoints_pulse_comp, by = list(checkpoints_pulse_comp$student_id), mean)
+
+#remove column 2
+checkpoints_pulse_comp <- checkpoints_pulse_comp[,c(1,3)]
+
+#rename Group.1 to student_id
+colnames(checkpoints_pulse_comp)[1] <- "student_id"
+
+#combine checkpoint_eoc_comp2 and checkpoints_pulse_comp by student_id
+data5 <- merge(checkpoints_eoc_comp2, checkpoints_pulse_comp, by = "student_id")
+
+#combine data5 by student_id, average the values of columns 2 and 3
+data6 <- aggregate(data5[,2:3], by = list(data5$student_id), mean)
+
+#plot EOC and response
+plot(data6$EOC, data6$response)
 ```
 ## Plots
 
