@@ -8,16 +8,16 @@ output: ioslides_presentation
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 # Set this to your working directory you have stored the project
-setwd("/Users/alexvidal/Desktop/Spring2024Classes/ASA_Datafest/Random_Sample/")
+setwd("")
 ```
 
 ```{r}
 # All of the random data specifically, the real data is too large to start with 
-media_views <- read.csv("media_views.csv")
-responses <- read.csv("responses.csv")
-page_views  <- read.csv("page_views.csv")
-checkpoints_eoc <- read.csv("checkpoints_eoc.csv")
-checkpoints_pulse <- read.csv("checkpoints_pulse.csv")
+media_views <- read.csv("Random Sample/media_views.csv")
+responses <- read.csv("Random Sample/responses.csv")
+page_views  <- read.csv("Random Sample/page_views.csv")
+checkpoints_eoc <- read.csv("Random Sample/checkpoints_eoc.csv")
+checkpoints_pulse <- read.csv("Random Sample/checkpoints_pulse.csv")
 
 
 # Cleaning the Data this won't show up on the presentation.
@@ -25,7 +25,60 @@ checkpoints_pulse <- read.csv("checkpoints_pulse.csv")
 
 
 ## Data Aanalysis
+```{r}
+#create a new dataframe with only the desired columns in page_views
+page_views_comp <- page_views[,c(1,2,3,4,5,6,7,8,9,14,15,16,17,18)]
+responses_comp <- responses[,c(1,2,3,4,5,6,8,9,10,11)]
+checkpoints_eoc_comp <- checkpoints_eoc[,c(1,2,3,4,5)]
 
+#merge the dataframes on the user_id column
+#data <- merge(page_views_comp, responses_comp, by = "student_id")
+#data <- merge(data, checkpoints_eoc_comp, by = "student_id")
+data <- merge(page_views_comp, checkpoints_eoc_comp, by = "student_id")
+
+#create a new dataframe with only the student_id and 10-14 and EOC
+data1 <- data[,c(1,10,11,12,13,14,18)]
+
+sum_na_rm <- function(x) sum(x, na.rm = TRUE)
+
+#combine rows by student_id and sum the values of the columns 2-6
+data2 <- aggregate(data1[,2:6], by = list(data1$student_id), sum_na_rm)
+
+#rename Group.1 to student_id
+colnames(data2)[1] <- "student_id"
+
+#add the EOC column to the data2 dataframe
+data2 <- merge(data2, data1[, c("student_id", "EOC")], by = "student_id")
+
+#combine rows by student_id , keep rows 2-6, and average the values of column 7
+data3 <- aggregate(data1[,7], by = list(data1$student_id), mean, na.rm = TRUE)
+colnames(data3)[1] <- "student_id"
+
+data4 <- merge(data3, data2, by = "student_id")
+
+colnames(data4)[2] <- "EOC"
+
+#make a grid of 2x2 plot
+par(mfrow=c(1,1))
+
+#plot EOC and idle_brief
+plot(data4$EOC, data4$idle_brief)
+
+#plot EOC and idle_long
+plot(data4$EOC, data4$idle_long)
+
+#plot EOC and off_page_brief
+plot(data4$EOC, data4$off_page_brief)
+
+#plot EOC and off_page_long
+plot(data4$EOC, data4$off_page_long)
+
+#create a dataframe of page_views with just columns 5 and 14
+page_views_comp2 <- page_views[,c(5,14)]
+
+#plot chapter_number vs engaged
+plot(page_views_comp2$chapter_number, page_views_comp2$engaged)
+```
 ## Plots
 
 ## Slide with R Output
